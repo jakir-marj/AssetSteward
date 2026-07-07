@@ -41,8 +41,9 @@ public class AuthService {
         );
         repository.save(user);
         
-        var jwtToken = jwtService.generateToken(user);
-        return new AuthResponse(jwtToken);
+        var jwtToken = jwtService.generateToken(user, request.isRememberMe());
+        double expiresAt = request.isRememberMe() ? 2592000.0 : 86400.0;
+        return new AuthResponse(jwtToken, "bearer", expiresAt);
     }
 
     public AuthResponse authenticate(AuthRequest request) {
@@ -56,7 +57,8 @@ public class AuthService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
                 
-        var jwtToken = jwtService.generateToken(user);
-        return new AuthResponse(jwtToken);
+        var jwtToken = jwtService.generateToken(user, request.isRememberMe());
+        double expiresAt = request.isRememberMe() ? 2592000.0 : 86400.0;
+        return new AuthResponse(jwtToken, "bearer", expiresAt);
     }
 }

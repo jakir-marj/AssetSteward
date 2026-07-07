@@ -2,9 +2,13 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Use JDK image directly instead of building a jar for hot reloading
+    image: eclipse-temurin:17-jdk-jammy
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - gradle_cache:/root/.gradle
+    command: ./gradlew bootRun
     container_name: assetsteward_app
     ports:
       - "8080:8080"
@@ -14,6 +18,7 @@ services:
       - DB_NAME=assetdb
       - DB_USER=postgres
       - DB_PASSWORD=postgres
+      - BACKEND_URL=${BACKEND_URL:-http://localhost:8080}
     depends_on:
       db:
         condition: service_healthy
@@ -41,6 +46,7 @@ services:
 
 volumes:
   postgres_data:
+  gradle_cache:
 
 networks:
   app-network:

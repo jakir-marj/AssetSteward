@@ -3,6 +3,7 @@ package com.qubikore.assetsteward.auth;
 import com.qubikore.assetsteward.auth.dto.AuthRequest;
 import com.qubikore.assetsteward.auth.dto.AuthResponse;
 import com.qubikore.assetsteward.auth.dto.RegisterRequest;
+import com.qubikore.assetsteward.common.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Registration successful", authService.register(request)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.authenticate(request));
+    public ResponseEntity<ApiResponse<AuthResponse>> authenticate(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Login successful", authService.authenticate(request)));
     }
 }
