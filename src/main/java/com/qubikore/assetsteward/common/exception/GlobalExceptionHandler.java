@@ -22,13 +22,18 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    @ExceptionHandler({MethodArgumentNotValidException.class, org.springframework.validation.BindException.class})
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(Exception ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage()));
+        if (ex instanceof MethodArgumentNotValidException) {
+            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors().forEach(error -> 
+                errors.put(error.getField(), error.getDefaultMessage()));
+        } else if (ex instanceof org.springframework.validation.BindException) {
+            ((org.springframework.validation.BindException) ex).getBindingResult().getFieldErrors().forEach(error -> 
+                errors.put(error.getField(), error.getDefaultMessage()));
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Validation error")); // Can also put 'errors' map in data if we want.
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Validation error: " + errors.toString()));
     }
 
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
@@ -45,7 +50,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> globalExceptionHandler(Exception ex, WebRequest request) {
+        ex.printStackTrace(); // Log the error to console
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred"));
+                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred: " + ex.getMessage()));
     }
 }

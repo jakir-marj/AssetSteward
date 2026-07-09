@@ -28,6 +28,7 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        
         if (repository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email is already in use");
         }
